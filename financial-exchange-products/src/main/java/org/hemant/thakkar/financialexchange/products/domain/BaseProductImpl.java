@@ -6,7 +6,7 @@ public abstract class BaseProductImpl implements Product {
 
 	private static AtomicLong idGenerator = new AtomicLong(1);
 
-	private long id;
+	private Long id;
 	private String symbol;
 	private String description;
 
@@ -15,12 +15,12 @@ public abstract class BaseProductImpl implements Product {
 	}
 	
 	@Override
-	public long getId() {
+	public Long getId() {
 		return this.id;
 	}
 
 	@Override
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class ProductManagementServiceImpl implements ProductManagementService {
 
 	@Autowired
-	@Qualifier("productMemoryRepositoryImpl")
+	@Qualifier("productJpaRepositoryImpl")
 	ProductRepository productRepository;
 	
 	@Override
