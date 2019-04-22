@@ -3,6 +3,7 @@ package org.hemant.thakkar.financialexchange.products.repository;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.hemant.thakkar.financialexchange.products.domain.Product;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 @Service("productMemoryRepositoryImpl")
 public class ProductMemoryRepositoryImpl implements ProductRepository {
+
+	private static AtomicLong idGenerator = new AtomicLong(1);
 
 	Map<Long, Product> products; 
 	
@@ -19,6 +22,9 @@ public class ProductMemoryRepositoryImpl implements ProductRepository {
 	
 	@Override
 	public long saveProduct(Product product) {
+		if (product.getId() == null) {
+			product.setId(idGenerator.getAndIncrement());
+		}
 		products.put(product.getId(), product);
 		return product.getId();
 	}
