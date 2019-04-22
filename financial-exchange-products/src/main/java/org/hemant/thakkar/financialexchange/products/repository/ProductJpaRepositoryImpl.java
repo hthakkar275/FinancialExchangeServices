@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 @Service("productJpaRepositoryImpl")
 public class ProductJpaRepositoryImpl implements ProductRepository {
 
-	
 	@Autowired
 	private EquityRepository equityRepository;
 	
