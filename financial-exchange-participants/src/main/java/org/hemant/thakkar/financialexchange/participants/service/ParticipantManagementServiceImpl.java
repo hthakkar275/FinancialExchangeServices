@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 @Service("participantManagementServiceImpl")
 public class ParticipantManagementServiceImpl implements ParticipantManagementService {
 
-	@Autowired
-	@Qualifier("participantMemoryRepositoryImpl")
+	@Autowired 
+	@Qualifier("participantJpaRepositoryImpl")
 	ParticipantRepository participantRepository;
 
 	@Override

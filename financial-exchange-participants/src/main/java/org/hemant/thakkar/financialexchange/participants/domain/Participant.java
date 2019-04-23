@@ -2,8 +2,9 @@ package org.hemant.thakkar.financialexchange.participants.domain;
 
 public interface Participant {
 
-	public long getId();
-	public void setId(long id);
+	public ParticipantType getParticipantType();
+	public Long getId();
+	public void setId(Long id);
 	public String getName();
 	public void setName(String name);
 } 

@@ -22,7 +22,7 @@ public class ProductJpaRepositoryImpl implements ProductRepository {
 		try {
 			if (product.getProductType() == ProductType.EQUITY) {
 				Equity equity = (Equity) product;
-				equityRepository.save(equity);
+				equityRepository.saveAndFlush(equity);
 				Optional<Equity> savedEquity = equityRepository.findBySymbol(product.getSymbol());
 				if (savedEquity.isPresent()) {
 					id = savedEquity.get().getId();

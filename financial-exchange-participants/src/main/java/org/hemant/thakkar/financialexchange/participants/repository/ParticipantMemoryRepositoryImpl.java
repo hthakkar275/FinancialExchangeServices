@@ -2,12 +2,15 @@ package org.hemant.thakkar.financialexchange.participants.repository;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.hemant.thakkar.financialexchange.participants.domain.Participant;
 import org.springframework.stereotype.Service;
 
 @Service("participantMemoryRepositoryImpl")
 public class ParticipantMemoryRepositoryImpl implements ParticipantRepository {
+
+	private static AtomicLong idGenerator = new AtomicLong(1);
 
 	Map<Long, Participant> participants;
 	
@@ -17,6 +20,9 @@ public class ParticipantMemoryRepositoryImpl implements ParticipantRepository {
 	
 	@Override
 	public long saveParticipant(Participant participant) {
+		if (participant.getId() == null) {
+			participant.setId(idGenerator.getAndIncrement());
+		}
 		participants.put(participant.getId(), participant);
 		return participant.getId();
 	}
