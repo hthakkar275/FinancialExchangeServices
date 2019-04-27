@@ -1,10 +1,10 @@
-package org.hemant.thakkar.financialexchange.products;
+package org.hemant.thakkar.financialexchange.orders;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class FinancialExchangeProductsApplication {
+public class FinancialExchangeOrdersApplication {
 
 	public static void main(String[] args) {
 		String databaseUrl = System.getProperty("database.url", "jdbc:postgresql://127.0.0.1/finex-database");
@@ -18,7 +18,8 @@ public class FinancialExchangeProductsApplication {
 		System.setProperty("spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation", "true");
 		System.setProperty("spring.jpa.database-platform", "org.hibernate.dialect.PostgreSQL9Dialect");
 
-		SpringApplication.run(FinancialExchangeProductsApplication.class, args);
+		SpringApplication.run(FinancialExchangeOrdersApplication.class, args);
 	}
 
 }
+

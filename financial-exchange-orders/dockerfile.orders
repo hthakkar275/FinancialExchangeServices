@@ -2,12 +2,13 @@ FROM docker.io/openjdk:11.0.2-jre-slim-stretch
 
 RUN apt-get update && apt-get -y install procps && apt-get -y install vim
 
-ADD target/financial-exchange-products-0.0.1-SNAPSHOT.jar /
+ADD target/financial-exchange-orders-0.0.1-SNAPSHOT.jar /
 
 ENV SERVICE_PORT 8080
 ENV DATABASE_URL jdbc:postgresql://localhost/finex-database
 ENV DATABASE_USERNAME postgres
 ENV DATABASE_PASSWORD password1
+ENV REMMOTE_SERVICES_BASE_URL http://localhost
 
 EXPOSE 8080/tcp
 
@@ -18,5 +19,5 @@ ENTRYPOINT cd / && \
    -Ddatabase.url=${DATABASE_URL} \
    -Ddatabase.username=${DATABASE_USERNAME} \
    -Ddatabase.password=${DATABASE_PASSWORD} \
-   ./financial-exchange-products-0.0.1-SNAPSHOT.jar
-   
+   -Dremote.services.baseurl=${REMOTE_SERVICES_BASE_URL} \
+   ./financial-exchange-orders-0.0.1-SNAPSHOT.jar
