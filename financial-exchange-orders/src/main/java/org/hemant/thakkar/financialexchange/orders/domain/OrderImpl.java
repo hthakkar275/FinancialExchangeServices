@@ -34,6 +34,7 @@ public class OrderImpl implements Order {
 	private LocalDateTime entryTime;
 	
 	@Column(name = "side")
+	@Enumerated(EnumType.STRING)
 	private Side side;
 	
 	@Column(name = "quantity")

@@ -1,0 +1,83 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.1.1.RELEASE</version>
+  </parent>
+  <groupId>org.hemant.thakkar</groupId>
+  <artifactId>financial-exchange-orderbooks</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  
+  <name>FinancialExchangeOrderBooksService</name>
+  <description>Financial Exchange Order Books Service</description>
+  <properties>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+	    <junit.jupiter.version>5.3.2</junit.jupiter.version>
+    	<junit.platform.version>1.3.2</junit.platform.version> 
+  </properties>
+  
+  <dependencies>
+  	<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-web</artifactId>
+	</dependency>
+    <dependency>
+       		<groupId>com.fasterxml.jackson.core</groupId>
+       		<artifactId>jackson-databind</artifactId>
+   	</dependency>
+	<dependency>
+    	<groupId>org.junit.jupiter</groupId>
+    	<artifactId>junit-jupiter-api</artifactId>
+    	<version>${junit.jupiter.version}</version>
+    	<scope>test</scope>
+	</dependency>
+	<dependency>
+    	<groupId>org.junit.jupiter</groupId>
+    	<artifactId>junit-jupiter-params</artifactId>
+    	<version>${junit.jupiter.version}</version>
+    	<scope>test</scope>
+	</dependency>
+	<dependency>
+    	<groupId>org.junit.jupiter</groupId>
+    	<artifactId>junit-jupiter-engine</artifactId>
+   		<version>${junit.jupiter.version}</version>
+    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.junit.platform</groupId>
+	    <artifactId>junit-platform-launcher</artifactId>
+	    <version>${junit.platform.version}</version>
+    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.junit.platform</groupId>
+	    <artifactId>junit-platform-runner</artifactId>
+	    <version>${junit.platform.version}</version>
+	    <scope>test</scope>
+	</dependency>
+	
+  </dependencies>  
+  
+  <build>
+     <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+               <fork>true</fork>
+               <mainClass>${start-class}</mainClass>
+            </configuration>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>repackage</goal>
+                  </goals>
+               </execution>
+            </executions>
+        </plugin>
+     </plugins>
+   </build>
+  
+</project>

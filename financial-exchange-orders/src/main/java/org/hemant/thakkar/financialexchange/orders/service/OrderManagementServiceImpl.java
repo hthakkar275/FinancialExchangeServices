@@ -57,8 +57,8 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 		if (orderId < 0) {
 			throw new ExchangeException(ResultCode.GENERAL_ERROR);
 		}
-		orderEntry.setId(orderId);
-		remoteServices.addOrderInBook(orderEntry);
+		order.setId(orderId);
+		remoteServices.addOrderInBook(order);
 		return order.getId();
 	}
 

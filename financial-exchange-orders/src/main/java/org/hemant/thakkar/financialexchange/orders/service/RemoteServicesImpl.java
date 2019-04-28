@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hemant.thakkar.financialexchange.orders.domain.OrderEntry;
+import org.hemant.thakkar.financialexchange.orders.domain.APIResponse;
+import org.hemant.thakkar.financialexchange.orders.domain.Order;
+import org.hemant.thakkar.financialexchange.orders.domain.OrderBookEntry;
 import org.hemant.thakkar.financialexchange.orders.domain.ResultCode;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -88,9 +90,32 @@ public class RemoteServicesImpl implements RemoteServices {
 	}
 
 	@Override
-	public boolean addOrderInBook(OrderEntry order) {
-		// TODO Auto-generated method stub
-		return true;
+	public boolean addOrderInBook(Order order) {
+		boolean addedToBook = false;
+		try {
+			String serviceUrl = baseUrl + ":" + servicesPorts.get("orderbooks.port") 
+					+ "/orderBook/order/";
+			
+			OrderBookEntry orderBookEntry = new OrderBookEntry();
+			orderBookEntry.setEntryTime(order.getEntryTime());
+			orderBookEntry.setOrderId(order.getId());
+			orderBookEntry.setPrice(order.getPrice());
+			orderBookEntry.setProductId(order.getProductId());
+			orderBookEntry.setQuantity(order.getQuantity());
+			orderBookEntry.setSide(order.getSide());
+			orderBookEntry.setType(order.getType());
+			
+			RestTemplate restTemplate = new RestTemplate(); 
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			HttpEntity<OrderBookEntry> entity = new HttpEntity<OrderBookEntry>(orderBookEntry, headers);
+			
+			ResponseEntity<APIResponse> response = restTemplate.exchange(serviceUrl, HttpMethod.POST, entity, APIResponse.class);
+			addedToBook = response.getBody().getResponseCode() == ResultCode.ORDER_ACCEPTED.getCode();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return addedToBook;
 	}
 
 	@Override
