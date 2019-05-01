@@ -15,8 +15,7 @@ import java.util.stream.Collectors;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderBookItem;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderType;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.Side;
-import org.hemant.thakkar.financialexchange.orderbooks.domain.Trade;
-import org.hemant.thakkar.financialexchange.orderbooks.domain.TradeImpl;
+import org.hemant.thakkar.financialexchange.orderbooks.domain.TradeEntry;
 
 public class OrderBookImpl implements OrderBook {
 	private static BigDecimal TWO = new BigDecimal("2.0");
@@ -53,7 +52,7 @@ public class OrderBookImpl implements OrderBook {
 	}
 	
 	
-	public void processOrder(OrderBookItem incomingOrder) {		
+	public void processOrder(OrderBookItem incomingOrder) {	
 		if (incomingOrder.getQuantity() <= 0 ) {
 			throw new IllegalArgumentException("processOrder() given qty <= 0");
 		}
@@ -62,7 +61,7 @@ public class OrderBookImpl implements OrderBook {
 			throw new IllegalArgumentException("order neither market nor limit: " + 
 					incomingOrder.getSide());
 		}
-
+		
 		if (incomingOrder.getType() == OrderType.LIMIT) {
 			BigDecimal clippedPrice = clipPrice(incomingOrder.getPrice());
 			incomingOrder.setPrice(clippedPrice);
@@ -107,6 +106,11 @@ public class OrderBookImpl implements OrderBook {
 			throw new IllegalArgumentException("order neither market nor limit: " + 
 				    						    side);
 		}
+		if (qtyRemaining > 0) {
+			remoteServices.orderCancelledQuantity(incomingOrder.getOrderId(), qtyRemaining, LocalDateTime.now());
+		}
+		incomingOrder.setQuantity(qtyRemaining);
+		
 //		if (incomingOrder.getTradedQantity() > 0 && incomingOrder.getTradedQantity() < incomingOrder.getQuantity()) {
 //			incomingOrder.setStatus(OrderStatus.PARTIALLY_FILLED);
 //		} else if (incomingOrder.getTradedQantity() == incomingOrder.getQuantity()) {
@@ -120,7 +124,6 @@ public class OrderBookImpl implements OrderBook {
 	
 	private void processLimitOrder(OrderBookItem incomingOrder) {
 		int qtyRemaining = incomingOrder.getQuantity();
-	
 		List<OrderBookItem> tradableOrders = this.items.stream()
 				.filter(o -> {
 					boolean match = false;
@@ -140,6 +143,7 @@ public class OrderBookImpl implements OrderBook {
 		}
 		if (qtyRemaining > 0) {
 			incomingOrder.setQuantity(qtyRemaining);
+			remoteServices.orderBookedQuantity(incomingOrder.getOrderId(), incomingOrder.getQuantity(), LocalDateTime.now());
 			this.items.add(incomingOrder);
 		}
 		
@@ -175,28 +179,31 @@ public class OrderBookImpl implements OrderBook {
 			if (qtyRemaining < headOrder.getQuantity()) {
 				qtyTraded = qtyRemaining;
 				qtyRemaining = 0;
+				headOrder.setQuantity(headOrder.getQuantity() - qtyTraded);
 //				headOrder.setStatus(OrderStatus.PARTIALLY_BOOKED_FILLED);
 			} else {
 				qtyTraded = headOrder.getQuantity();
 				qtyRemaining -= qtyTraded;
+				headOrder.setQuantity(0);
 //				headOrder.setStatus(OrderStatus.FILLED);
 				iterator.remove();
 			}
 //			headOrder.setTradedQuantity(headOrder.getTradedQantity() + qtyTraded);
 //			headOrder.setBookedQuantity(headOrder.getBookedQuantity() - qtyTraded);
 //			incomingOrder.setTradedQuantity(incomingOrder.getTradedQantity() + qtyTraded);
-			Trade trade = new TradeImpl();
+			TradeEntry tradeEntry = new TradeEntry();
 			if (incomingOrder.getSide() == Side.SELL) {
-				trade.setSellTradableId(incomingOrder.getOrderId());
-				trade.setBuyTradableId(headOrder.getOrderId());
+				tradeEntry.setSellTradableId(incomingOrder.getOrderId());
+				tradeEntry.setBuyTradableId(headOrder.getOrderId());
 			} else {
-				trade.setSellTradableId(headOrder.getOrderId());
-				trade.setBuyTradableId(incomingOrder.getOrderId());
+				tradeEntry.setSellTradableId(headOrder.getOrderId());
+				tradeEntry.setBuyTradableId(incomingOrder.getOrderId());
 			}
-			trade.setPrice(headOrder.getPrice());
-			trade.setQuantity(qtyTraded);
-			remoteServices.saveTrade(trade);
-//			remoteServices.saveOrder(headOrder);
+			tradeEntry.setPrice(headOrder.getPrice());
+			tradeEntry.setQuantity(qtyTraded);
+			tradeEntry.setTradeTime(LocalDateTime.now());
+			remoteServices.saveTrade(tradeEntry);
+			remoteServices.updateOrders(tradeEntry);
 		}
 		return qtyRemaining;
 	}

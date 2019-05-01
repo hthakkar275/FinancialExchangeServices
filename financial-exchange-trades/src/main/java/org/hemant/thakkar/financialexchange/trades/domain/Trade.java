@@ -1,12 +1,12 @@
-package org.hemant.thakkar.financialexchange.orderbooks.domain;
+package org.hemant.thakkar.financialexchange.trades.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public interface Trade {
 
-	public long getId();
-	public void setId(long id);
+	public Long getId();
+	public void setId(Long id);
 	public LocalDateTime getTradeTime();
 	public void setTradeTime(LocalDateTime tradeTime);
 	public long getBuyTradableId();
@@ -17,4 +17,6 @@ public interface Trade {
 	public void setPrice(BigDecimal price);
 	public int getQuantity();
 	public void setQuantity(int quantity);
+	public boolean isBusted();
+	public void setBusted(boolean busted);
 }

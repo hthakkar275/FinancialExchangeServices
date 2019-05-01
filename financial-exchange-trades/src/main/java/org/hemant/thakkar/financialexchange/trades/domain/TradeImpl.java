@@ -1,40 +1,69 @@
-package org.hemant.thakkar.financialexchange.orderbooks.domain;
+package org.hemant.thakkar.financialexchange.trades.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "trade")
 public class TradeImpl implements Trade {
 
-	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss.SSS");
+	static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss.SSS");
 
-	private long id;
+	@Id
+	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+	
+	@Column(name = "trade_time")
 	private LocalDateTime tradeTime;
+	
+	@Column(name = "buy_tradable_id")
 	private long buyTradableId;
+	
+	@Column(name = "sell_tradable_id")
 	private long sellTradableId;
+	
+	@Column(name = "quantity")
 	private int quantity;
+	
+	@Column(name = "price")
 	private BigDecimal price;
 	
+	@Column(name = "busted") 
+	private boolean busted;
+	
+	public boolean isBusted() {
+		return busted;
+	}
+
+	public void setBusted(boolean busted) {
+		this.busted = busted;
+	}
+
 	public TradeImpl() {
 		this.setTradeTime(LocalDateTime.now());
 	}
 	
-	@Override
-	public long getId() {
+	public Long getId() {
 		return this.id;
 	}
 
-	@Override
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
-	@Override
 	public LocalDateTime getTradeTime() {
 		return this.tradeTime;
 	}
 
-	@Override
 	public void setTradeTime(LocalDateTime tradeTime) {
 		this.tradeTime = tradeTime;
 	}
@@ -55,22 +84,18 @@ public class TradeImpl implements Trade {
 		this.sellTradableId = sellTradableId;
 	}
 
-	@Override
 	public BigDecimal getPrice() {
 		return this.price;
 	}
 
-	@Override
 	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
-	@Override
 	public int getQuantity() {
 		return this.quantity;
 	}
 
-	@Override
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}

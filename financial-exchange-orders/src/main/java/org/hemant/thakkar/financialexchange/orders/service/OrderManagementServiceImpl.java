@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.hemant.thakkar.financialexchange.orders.domain.ExchangeException;
 import org.hemant.thakkar.financialexchange.orders.domain.Order;
+import org.hemant.thakkar.financialexchange.orders.domain.OrderActivity;
+import org.hemant.thakkar.financialexchange.orders.domain.OrderActivityEntry;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderEntry;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderImpl;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderLongevity;
@@ -86,7 +88,7 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 	}
 
 	@Override
-	public void updateFromOrderBook(long orderId, OrderEntry orderEntry) throws ExchangeException {
+	public void updateOrder(long orderId, OrderEntry orderEntry) throws ExchangeException {
 		Order order = createOrder(orderEntry);
 		orderRepository.saveOrder((OrderImpl) order);
 	}
@@ -117,6 +119,37 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 				.map(this::createOrderReport)
 				.collect(Collectors.toList());
 		return orderReports;
+	}
+
+	@Override
+	public void addOrderActivity(long orderId, OrderActivityEntry orderActivityEntry) throws ExchangeException {
+		Order order = orderRepository.getOrder(orderId);
+		if (order == null) {
+			throw new ExchangeException(ResultCode.ORDER_NOT_FOUND);
+		}
+		if (orderActivityEntry.getOrderActivity() == OrderActivity.BOOKED) {
+			order.setBookedQuantity(orderActivityEntry.getBookedQuantity());
+			order.setStatus(OrderStatus.BOOKED);
+		} else if (orderActivityEntry.getOrderActivity() == OrderActivity.TRADED) {
+			order.setBookedQuantity(order.getBookedQuantity() - orderActivityEntry.getTradedQuantity());
+			order.setTradedQuantity(order.getTradedQantity() + orderActivityEntry.getTradedQuantity());
+			if (order.getBookedQuantity() > 0) {
+				order.setStatus(OrderStatus.PARTIALLY_BOOKED_FILLED);
+			} else {
+				order.setStatus(OrderStatus.FILLED);
+			}
+		} else if (orderActivityEntry.getOrderActivity() == OrderActivity.CANCELLED) {
+			order.setCancelledQuantity(orderActivityEntry.getCancelledQuantity());
+			order.setBookedQuantity(0);
+			if (order.getTradedQantity() > 0) {
+				order.setStatus(OrderStatus.PARTIALLY_CANCELLED);
+			} else {
+				order.setStatus(OrderStatus.CANCELLED);
+			}
+		} else {
+			order.setStatus(OrderStatus.UNKNOWN);
+		}
+		orderRepository.saveOrder((OrderImpl) order);
 	}
 
 }

@@ -3,6 +3,7 @@ package org.hemant.thakkar.financialexchange.orders.controller;
 import org.hemant.thakkar.financialexchange.orders.domain.APIDataResponse;
 import org.hemant.thakkar.financialexchange.orders.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orders.domain.ExchangeException;
+import org.hemant.thakkar.financialexchange.orders.domain.OrderActivityEntry;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderEntry;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderReport;
 import org.hemant.thakkar.financialexchange.orders.domain.ResultCode;
@@ -44,11 +45,11 @@ public class OrderManagementController {
 	} 
 	
 	@PutMapping(value = "/order/{orderId}", produces = "application/json", consumes = "application/json")
-	public APIResponse updateOrderFromOrderBook(@PathVariable("orderId") long orderId,
+	public APIResponse updateOrder(@PathVariable("orderId") long orderId,
 			@RequestBody OrderEntry orderEntry) {
 		APIResponse response = new APIResponse();
 		try {
-			orderManagementService.updateFromOrderBook(orderId, orderEntry);
+			orderManagementService.updateOrder(orderId, orderEntry);
 			response.setSuccess(true);
 			response.setInfoMessage(ResultCode.ORDER_UPDATED.getMessage());
 			response.setResponseCode(ResultCode.ORDER_UPDATED.getCode());
@@ -62,6 +63,27 @@ public class OrderManagementController {
 		return response;
 
 	} 
+	
+	@PutMapping(value = "/order/activity/{orderId}", produces = "application/json", consumes = "application/json")
+	public APIResponse updateOrderTrade(@PathVariable("orderId") long orderId,
+			@RequestBody OrderActivityEntry orderActivityEntry) {
+		APIResponse response = new APIResponse();
+		try {
+			orderManagementService.addOrderActivity(orderId, orderActivityEntry);
+			response.setSuccess(true);
+			response.setInfoMessage(ResultCode.ORDER_UPDATED.getMessage());
+			response.setResponseCode(ResultCode.ORDER_UPDATED.getCode());
+		} catch (ExchangeException ee) {
+			response.setErrorMessage(ee.getMessage());
+			response.setResponseCode(ee.getErrorCode());
+		} catch (Throwable t) {
+			response.setErrorMessage("Unexpected error. Please contact customer service");
+			response.setResponseCode(ResultCode.GENERAL_ERROR.getCode());
+		}
+		return response;
+
+	} 
+
 
 	@GetMapping(value = "/order/{orderId}", produces = "application/json", consumes = "application/json")
 	public APIDataResponse<OrderReport> getOrderStatus(@PathVariable("orderId") long orderId) {
