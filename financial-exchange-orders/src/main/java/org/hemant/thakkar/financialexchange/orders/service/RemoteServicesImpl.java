@@ -24,29 +24,43 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RemoteServicesImpl implements RemoteServices {
 
 	private String baseUrl;
+	private boolean useNonStandardPort;
 	private Map<String, Integer> servicesPorts;
 	
 	public RemoteServicesImpl() {
 		baseUrl = System.getProperty("remote.services.baseurl", "http://localhost");
+		String useNonStanardPortStr = System.getProperty("remote.services.useNonStandardPort", "false");
+		try {
+			useNonStandardPort = Boolean.parseBoolean(useNonStanardPortStr);
+		} catch (Exception e) {
+			useNonStandardPort = true;
+		}
 		servicesPorts = new HashMap<>();
-		servicesPorts.put("products.port", 
-				Integer.parseInt(System.getProperty("products.port", "8080")));
-		servicesPorts.put("participants.port", 
-				Integer.parseInt(System.getProperty("participants.port", "8081")));
-		servicesPorts.put("orders.port", 
-				Integer.parseInt(System.getProperty("orders.port", "8082")));
-		servicesPorts.put("orderbooks.port", 
-				Integer.parseInt(System.getProperty("orderbooks.port", "8083")));
-		servicesPorts.put("trades.port", 
-				Integer.parseInt(System.getProperty("trades.port", "8084")));
+		servicesPorts.put("product.service.port", 
+				Integer.parseInt(System.getProperty("product.service.port", "8080")));
+		servicesPorts.put("participant.service.port", 
+				Integer.parseInt(System.getProperty("participant.service.port", "8081")));
+		servicesPorts.put("order.service.port", 
+				Integer.parseInt(System.getProperty("order.service.port", "8082")));
+		servicesPorts.put("orderbook.service.port", 
+				Integer.parseInt(System.getProperty("orderbook.service.port", "8083")));
+		servicesPorts.put("trade.service.port", 
+				Integer.parseInt(System.getProperty("trade.service.port", "8084")));
 	}
 	
 	@Override
 	public boolean isValidProduct(long productId) {
 		boolean validProduct = false;
 		try {
-			String serviceUrl = baseUrl + ":" + servicesPorts.get("products.port") 
-					+ "/product/equity/" + productId;
+			StringBuffer stringBuffer = new StringBuffer(baseUrl);
+			if (useNonStandardPort) {
+				stringBuffer.append(":").append(servicesPorts.get("product.service.port"));
+			}
+			stringBuffer.append("/product/equity/");
+			stringBuffer.append(productId);
+			String serviceUrl = stringBuffer.toString();
+			System.out.println("isValidProduct service url: " + serviceUrl);
+			
 			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
@@ -66,8 +80,15 @@ public class RemoteServicesImpl implements RemoteServices {
 	public boolean isValidParticipant(long participantId) {
 		boolean validParticipant = false;
 		try {
-			String serviceUrl = baseUrl + ":" + servicesPorts.get("participants.port") 
-					+ "/participant/broker/" + participantId;
+			StringBuffer stringBuffer = new StringBuffer(baseUrl);
+			if (useNonStandardPort) {
+				stringBuffer.append(":").append(servicesPorts.get("participant.service.port"));
+			}
+			stringBuffer.append("/participant/broker/");
+			stringBuffer.append(participantId);
+			String serviceUrl = stringBuffer.toString();
+			System.out.println("isValidParticipant service url: " + serviceUrl);
+
 			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
@@ -93,9 +114,14 @@ public class RemoteServicesImpl implements RemoteServices {
 	public boolean addOrderInBook(Order order) {
 		boolean addedToBook = false;
 		try {
-			String serviceUrl = baseUrl + ":" + servicesPorts.get("orderbooks.port") 
-					+ "/orderBook/order/";
-			
+			StringBuffer stringBuffer = new StringBuffer(baseUrl);
+			if (useNonStandardPort) {
+				stringBuffer.append(":").append(servicesPorts.get("orderbook.service.port"));
+			}
+			stringBuffer.append("/orderBook/order/");
+			String serviceUrl = stringBuffer.toString();
+			System.out.println("addOrderInBook service url: " + serviceUrl);
+
 			OrderBookEntry orderBookEntry = new OrderBookEntry();
 			orderBookEntry.setEntryTime(order.getEntryTime());
 			orderBookEntry.setOrderId(order.getId());

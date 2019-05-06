@@ -25,30 +25,42 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RemoteServicesImpl implements RemoteServices {
 
 	private String baseUrl;
+	private boolean useNonStandardPort;
 	private Map<String, Integer> servicesPorts;
 	
 	public RemoteServicesImpl() {
 		baseUrl = System.getProperty("remote.services.baseurl", "http://localhost");
+		String useNonStanardPortStr = System.getProperty("remote.services.useNonStandardPort", "false");
+		try {
+			useNonStandardPort = Boolean.parseBoolean(useNonStanardPortStr);
+		} catch (Exception e) {
+			useNonStandardPort = true;
+		}
 		servicesPorts = new HashMap<>();
-		servicesPorts.put("products.port", 
-				Integer.parseInt(System.getProperty("products.port", "8080")));
-		servicesPorts.put("participants.port", 
-				Integer.parseInt(System.getProperty("participants.port", "8081")));
-		servicesPorts.put("orders.port", 
-				Integer.parseInt(System.getProperty("orders.port", "8082")));
-		servicesPorts.put("orderbooks.port", 
-				Integer.parseInt(System.getProperty("orderbooks.port", "8083")));
-		servicesPorts.put("trades.port", 
-				Integer.parseInt(System.getProperty("trades.port", "8084")));
+		servicesPorts.put("product.service.port", 
+				Integer.parseInt(System.getProperty("product.service.port", "8080")));
+		servicesPorts.put("participant.service.port", 
+				Integer.parseInt(System.getProperty("participant.service.port", "8081")));
+		servicesPorts.put("order.service.port", 
+				Integer.parseInt(System.getProperty("order.service.port", "8082")));
+		servicesPorts.put("orderbook.service.port", 
+				Integer.parseInt(System.getProperty("orderbook.service.port", "8083")));
+		servicesPorts.put("trade.service.port", 
+				Integer.parseInt(System.getProperty("trade.service.port", "8084")));
 	}
-	
+		
 	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean saveTrade(TradeEntry tradeEntry) {
 		boolean updatedTrade = false;
 		try {
-			String serviceUrl = baseUrl + ":" + servicesPorts.get("trades.port") 
-					+ "/trade";
+			StringBuffer stringBuffer = new StringBuffer(baseUrl);
+			if (useNonStandardPort) {
+				stringBuffer.append(":").append(servicesPorts.get("trade.service.port"));
+			}
+			stringBuffer.append("/trade/");
+			String serviceUrl = stringBuffer.toString();
+			System.out.println("saveTrade service url: " + serviceUrl);
 			
 			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
@@ -67,8 +79,15 @@ public class RemoteServicesImpl implements RemoteServices {
 	public String getProductSymbol(long productId) {
 		String symbol = null;
 		try {
-			String serviceUrl = baseUrl + ":" + servicesPorts.get("products.port") 
-					+ "/product/equity/" + productId;
+			StringBuffer stringBuffer = new StringBuffer(baseUrl);
+			if (useNonStandardPort) {
+				stringBuffer.append(":").append(servicesPorts.get("product.service.port"));
+			}
+			stringBuffer.append("/product/equity/");
+			stringBuffer.append(productId);
+			String serviceUrl = stringBuffer.toString();
+			System.out.println("getProductSymbol service url: " + serviceUrl);
+
 			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
@@ -103,8 +122,14 @@ public class RemoteServicesImpl implements RemoteServices {
 	public boolean orderTradedQuantity(long orderId, LocalDateTime tradeTime, int tradedQuantity) {
 		boolean updatedOrder = false;
 		try {
-			String serviceUrl = baseUrl + ":" + servicesPorts.get("orders.port") 
-					+ "/order/activity/" + orderId;
+			StringBuffer stringBuffer = new StringBuffer(baseUrl);
+			if (useNonStandardPort) {
+				stringBuffer.append(":").append(servicesPorts.get("order.service.port"));
+			}
+			stringBuffer.append("/order/activity/");
+			stringBuffer.append(orderId);
+			String serviceUrl = stringBuffer.toString();
+			System.out.println("orderTradedQuantity service url: " + serviceUrl);
 			
 			OrderActivityEntry orderActivityEntry = new OrderActivityEntry();
 			orderActivityEntry.setOrderId(orderId);
@@ -129,9 +154,15 @@ public class RemoteServicesImpl implements RemoteServices {
 	public boolean orderBookedQuantity(long orderId, int bookedQuantity, LocalDateTime bookedTime) {
 		boolean updatedOrder = false;
 		try {
-			String serviceUrl = baseUrl + ":" + servicesPorts.get("orders.port") 
-					+ "/order/activity/" + orderId;
-			
+			StringBuffer stringBuffer = new StringBuffer(baseUrl);
+			if (useNonStandardPort) {
+				stringBuffer.append(":").append(servicesPorts.get("order.service.port"));
+			}
+			stringBuffer.append("/order/activity/");
+			stringBuffer.append(orderId);
+			String serviceUrl = stringBuffer.toString();
+			System.out.println("orderBookedQuantity service url: " + serviceUrl);
+
 			OrderActivityEntry orderActivityEntry = new OrderActivityEntry();
 			orderActivityEntry.setOrderId(orderId);
 			orderActivityEntry.setBookedQuantity(bookedQuantity);
@@ -155,8 +186,14 @@ public class RemoteServicesImpl implements RemoteServices {
 	public boolean orderCancelledQuantity(long orderId, int cancelledQuantity, LocalDateTime cancelledTime) {
 		boolean updatedOrder = false;
 		try {
-			String serviceUrl = baseUrl + ":" + servicesPorts.get("orders.port") 
-					+ "/order/activity/" + orderId;
+			StringBuffer stringBuffer = new StringBuffer(baseUrl);
+			if (useNonStandardPort) {
+				stringBuffer.append(":").append(servicesPorts.get("order.service.port"));
+			}
+			stringBuffer.append("/order/activity/");
+			stringBuffer.append(orderId);
+			String serviceUrl = stringBuffer.toString();
+			System.out.println("orderCancelledQuantity service url: " + serviceUrl);
 			
 			OrderActivityEntry orderActivityEntry = new OrderActivityEntry();
 			orderActivityEntry.setOrderId(orderId);

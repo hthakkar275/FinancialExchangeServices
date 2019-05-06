@@ -8,7 +8,8 @@ ENV SERVICE_PORT 8080
 ENV DATABASE_URL jdbc:postgresql://localhost/finex-database
 ENV DATABASE_USERNAME postgres
 ENV DATABASE_PASSWORD password1
-ENV REMMOTE_SERVICES_BASE_URL http://localhost
+ENV REMOTE_SERVICES_BASE_URL http://localhost
+ENV REMOTE_SERVICES_USE_NONSTANDARD_PORT false
 
 EXPOSE 8080/tcp
 
@@ -20,4 +21,5 @@ ENTRYPOINT cd / && \
    -Ddatabase.username=${DATABASE_USERNAME} \
    -Ddatabase.password=${DATABASE_PASSWORD} \
    -Dremote.services.baseurl=${REMOTE_SERVICES_BASE_URL} \
+   -Dremote.services.useNonStandardPort=${REMOTE_SERVICES_USE_NONSTANDARD_PORT} \
    ./financial-exchange-orders-0.0.1-SNAPSHOT.jar
