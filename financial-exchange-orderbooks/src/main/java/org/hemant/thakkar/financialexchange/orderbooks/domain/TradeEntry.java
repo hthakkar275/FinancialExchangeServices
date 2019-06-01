@@ -47,6 +47,14 @@ public class TradeEntry {
 	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
-
+	public String toString() {
+		StringBuilder output = new StringBuilder();
+		output.append("id=" + id).append(";");
+		output.append("buyOrderId=" + buyTradableId).append(";");
+		output.append("sellOrderId=" + sellTradableId).append(";");
+		output.append("quantity=" + quantity).append(";");
+		output.append("price=" + price);
+		return output.toString();
+	}
 	
 }

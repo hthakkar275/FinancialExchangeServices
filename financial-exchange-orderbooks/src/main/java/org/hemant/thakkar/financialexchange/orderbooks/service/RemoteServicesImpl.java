@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.APIDataResponse;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderActivity;
@@ -23,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service("remoteServicesImpl")
 public class RemoteServicesImpl implements RemoteServices {
+
+	private static final Log logger = LogFactory.getLog(RemoteServicesImpl.class);
 
 	private String baseUrl;
 	private boolean useNonStandardPort;
@@ -52,6 +56,7 @@ public class RemoteServicesImpl implements RemoteServices {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean saveTrade(TradeEntry tradeEntry) {
+		logger.trace("Entering saveTrade: "+ tradeEntry);
 		boolean updatedTrade = false;
 		try {
 			StringBuffer stringBuffer = new StringBuffer(baseUrl);
@@ -70,8 +75,9 @@ public class RemoteServicesImpl implements RemoteServices {
 			ResponseEntity<APIDataResponse> response = restTemplate.exchange(serviceUrl, HttpMethod.POST, entity, APIDataResponse.class);
 			updatedTrade = response.getBody().getResponseCode() == ResultCode.TRADE_ACCEPTED.getCode();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error while calling trade service for trade: "+ tradeEntry, e);
 		}
+		logger.trace("Exiting saveTrade: "+ tradeEntry);
 		return updatedTrade;
 	}
 
@@ -98,13 +104,14 @@ public class RemoteServicesImpl implements RemoteServices {
 			JsonNode product = root.get("data");
 			symbol = product.get("symbol").asText();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error while calling product service service for product id: "+ productId, e);
 		}
 		return symbol;
 	}
 
 	@Override
 	public boolean updateOrders(TradeEntry tradeEntry) {
+		logger.trace("Entering updateOrders: "+ tradeEntry);
 		boolean updatedOrders = false;
 		try {
 			boolean buySideOrderUpdated = orderTradedQuantity(tradeEntry.getBuyTradableId(), 
@@ -113,13 +120,16 @@ public class RemoteServicesImpl implements RemoteServices {
 					tradeEntry.getTradeTime(), tradeEntry.getQuantity());
 			updatedOrders = buySideOrderUpdated && sellSideOrderUpdated;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error while adding order traded quantity: "+ tradeEntry, e);
 		}
+		logger.trace("Exiting updateOrders: "+ tradeEntry);
 		return updatedOrders;
 	}
 	
 	@Override
 	public boolean orderTradedQuantity(long orderId, LocalDateTime tradeTime, int tradedQuantity) {
+		logger.trace("Entering orderTradedQuantity: orderId=" + orderId + "; traded=" + tradedQuantity);
+
 		boolean updatedOrder = false;
 		try {
 			StringBuffer stringBuffer = new StringBuffer(baseUrl);
@@ -145,13 +155,17 @@ public class RemoteServicesImpl implements RemoteServices {
 			ResponseEntity<APIResponse> response = restTemplate.exchange(serviceUrl, HttpMethod.PUT, entity, APIResponse.class);
 			updatedOrder = response.getBody().getResponseCode() == ResultCode.ORDER_UPDATED.getCode();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error in orderTradedQuantity: orderId=" + orderId + "; traded=" + tradedQuantity, e);
 		}
+		logger.trace("Exiting orderTradedQuantity: orderId=" + orderId + "; traded=" + tradedQuantity);
+
 		return updatedOrder;
 	}
 	
 	@Override
 	public boolean orderBookedQuantity(long orderId, int bookedQuantity, LocalDateTime bookedTime) {
+		logger.trace("Entering orderBookedQuantity: orderId=" + orderId + "; booked=" + bookedQuantity);
+
 		boolean updatedOrder = false;
 		try {
 			StringBuffer stringBuffer = new StringBuffer(baseUrl);
@@ -177,13 +191,16 @@ public class RemoteServicesImpl implements RemoteServices {
 			ResponseEntity<APIResponse> response = restTemplate.exchange(serviceUrl, HttpMethod.PUT, entity, APIResponse.class);
 			updatedOrder = response.getBody().getResponseCode() == ResultCode.ORDER_UPDATED.getCode();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error in orderBookedQuantity: orderId=" + orderId + "; booked=" + bookedQuantity, e);
 		}
+		logger.trace("Exiting orderBookedQuantity: orderId=" + orderId + "; booked=" + bookedQuantity);
+
 		return updatedOrder;
 	}
 
 	@Override
 	public boolean orderCancelledQuantity(long orderId, int cancelledQuantity, LocalDateTime cancelledTime) {
+		logger.trace("Entering orderCancelledQuantity: orderId=" + orderId + "; cancelled=" + cancelledQuantity);
 		boolean updatedOrder = false;
 		try {
 			StringBuffer stringBuffer = new StringBuffer(baseUrl);
@@ -209,8 +226,9 @@ public class RemoteServicesImpl implements RemoteServices {
 			ResponseEntity<APIResponse> response = restTemplate.exchange(serviceUrl, HttpMethod.PUT, entity, APIResponse.class);
 			updatedOrder = response.getBody().getResponseCode() == ResultCode.ORDER_UPDATED.getCode();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Exiting orderCancelledQuantity: orderId=" + orderId + "; cancelled=" + cancelledQuantity, e);
 		}
+		logger.trace("Exiting orderCancelledQuantity: orderId=" + orderId + "; cancelled=" + cancelledQuantity);
 		return updatedOrder;
 	}
 

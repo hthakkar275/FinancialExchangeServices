@@ -1,9 +1,12 @@
 package org.hemant.thakkar.financialexchange.orders.domain;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 public class OrderActivityEntry {
+
+	private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss.SSS");
 
 	private long orderId;
 	private OrderActivity orderActivity;
@@ -48,6 +51,15 @@ public class OrderActivityEntry {
 	public void setOrderActivity(OrderActivity orderActivity) {
 		this.orderActivity = orderActivity;
 	}
-	
+	public String toString() {
+		StringBuilder output = new StringBuilder();
+		output.append("orderId=").append(orderId).append(";");
+		output.append("activity=").append(orderActivity).append(";");
+		output.append("time=").append(timeFormatter.format(activityTime)).append(";");
+		output.append("traded=").append(tradedQuantity).append(";");
+		output.append("booked=").append(bookedQuantity).append(";");
+		output.append("cancelled=").append(cancelledQuantity);
+		return output.toString();
+	}
 	
 }

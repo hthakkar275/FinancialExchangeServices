@@ -66,6 +66,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 		order.setSide(orderBookEntry.getSide());
 		order.setQuantity(orderBookEntry.getQuantity());
 		order.setPrice(orderBookEntry.getPrice());
+		order.setEntryTime(orderBookEntry.getEntryTime());
 		return order;
 	}
 

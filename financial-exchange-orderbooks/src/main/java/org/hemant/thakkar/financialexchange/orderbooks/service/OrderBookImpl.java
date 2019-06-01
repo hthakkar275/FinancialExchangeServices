@@ -12,12 +12,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderBookItem;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderType;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.Side;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.TradeEntry;
 
 public class OrderBookImpl implements OrderBook {
+	
+	private static final Log logger = LogFactory.getLog(OrderBookImpl.class);
+
 	private static BigDecimal TWO = new BigDecimal("2.0");
 	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss.SSS");
 	
@@ -123,6 +128,7 @@ public class OrderBookImpl implements OrderBook {
 	
 	
 	private void processLimitOrder(OrderBookItem incomingOrder) {
+		logger.trace("Entering procesLimitOrder: " + incomingOrder);
 		int qtyRemaining = incomingOrder.getQuantity();
 		List<OrderBookItem> tradableOrders = this.items.stream()
 				.filter(o -> {
@@ -166,11 +172,13 @@ public class OrderBookImpl implements OrderBook {
 //			this.orders.add(incomingOrder);
 //		}
 //		remoteServices.saveOrder(incomingOrder);
-
+		logger.trace("Exiting procesLimitOrder: " + incomingOrder);
 	}
 	
 	
 	private int processOrderList(List<OrderBookItem> tradableOrders, int qtyRemaining, OrderBookItem incomingOrder) {
+		logger.trace("Entering processOrderList: " + incomingOrder);
+
 		Iterator<OrderBookItem> iterator = tradableOrders.iterator();
 		
 		while ((iterator.hasNext()) && (qtyRemaining > 0)) {
@@ -205,6 +213,8 @@ public class OrderBookImpl implements OrderBook {
 			remoteServices.saveTrade(tradeEntry);
 			remoteServices.updateOrders(tradeEntry);
 		}
+		logger.trace("Exiting processOrderList: " + incomingOrder + " Remaining Qty = " + qtyRemaining);
+
 		return qtyRemaining;
 	}
 	

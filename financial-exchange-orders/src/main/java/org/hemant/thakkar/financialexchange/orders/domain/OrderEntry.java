@@ -68,5 +68,14 @@ public class OrderEntry {
 	public void setParticipantId(long participantId) {
 		this.participantId = participantId;
 	}
+	public String toString() {
+		StringBuilder output = new StringBuilder();
+		output.append("id=").append(id).append(";");
+		output.append("side=").append(side).append(";");
+		output.append("quantity=").append(quantity).append(";");
+		output.append("price=").append(price).append(";");
+		output.append("status=").append(status).append(";");
+		return output.toString();
+	}
  	
 }

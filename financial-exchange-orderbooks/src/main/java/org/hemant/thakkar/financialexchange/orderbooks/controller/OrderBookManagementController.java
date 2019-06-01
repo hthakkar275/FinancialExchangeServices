@@ -1,5 +1,7 @@
 package org.hemant.thakkar.financialexchange.orderbooks.controller;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.APIDataResponse;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderBookEntry;
@@ -19,12 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OrderBookManagementController {
 
+	private static final Log logger = LogFactory.getLog(OrderBookManagementController.class);
+
 	@Autowired
 	@Qualifier("orderBookServiceImpl")
 	private OrderBookService orderBookService;
 	
 	@PostMapping(value = "/orderBook/order", produces = "application/json", consumes = "application/json")
 	public APIResponse acceptNewOrder(@RequestBody OrderBookEntry orderBookEntry) {
+		logger.trace("Entering acceptNewOrder: " + orderBookEntry);
 		APIResponse response = new APIResponse();
 		try {
 			orderBookService.addOrder(orderBookEntry);
@@ -32,6 +37,7 @@ public class OrderBookManagementController {
 			response.setInfoMessage(ResultCode.ORDER_ACCEPTED.getMessage());
 			response.setResponseCode(ResultCode.ORDER_ACCEPTED.getCode());
 		} catch (Throwable t) {
+			logger.error("Unexpected error: " + orderBookEntry, t);
 			response.setErrorMessage("Unexpected error. Please contact customer service");
 			response.setResponseCode(ResultCode.GENERAL_ERROR.getCode());
 		}

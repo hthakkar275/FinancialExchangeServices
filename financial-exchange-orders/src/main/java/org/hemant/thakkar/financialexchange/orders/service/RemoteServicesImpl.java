@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orders.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orders.domain.Order;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderBookEntry;
@@ -22,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service("remoteServicesImpl")
 public class RemoteServicesImpl implements RemoteServices {
+
+	private static final Log logger = LogFactory.getLog(RemoteServicesImpl.class);
 
 	private String baseUrl;
 	private boolean useNonStandardPort;
@@ -112,6 +116,7 @@ public class RemoteServicesImpl implements RemoteServices {
 
 	@Override
 	public boolean addOrderInBook(Order order) {
+		logger.trace("Entering addOrderInBook: " + order);
 		boolean addedToBook = false;
 		try {
 			StringBuffer stringBuffer = new StringBuffer(baseUrl);
@@ -139,8 +144,9 @@ public class RemoteServicesImpl implements RemoteServices {
 			ResponseEntity<APIResponse> response = restTemplate.exchange(serviceUrl, HttpMethod.POST, entity, APIResponse.class);
 			addedToBook = response.getBody().getResponseCode() == ResultCode.ORDER_ACCEPTED.getCode();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error during service call to orderbook service for order: " + order);
 		}
+		logger.trace("Exiting addOrderInBook: " + order);
 		return addedToBook;
 	}
 

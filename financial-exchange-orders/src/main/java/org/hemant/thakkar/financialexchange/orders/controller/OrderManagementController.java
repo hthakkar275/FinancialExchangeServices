@@ -1,5 +1,7 @@
 package org.hemant.thakkar.financialexchange.orders.controller;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orders.domain.APIDataResponse;
 import org.hemant.thakkar.financialexchange.orders.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orders.domain.ExchangeException;
@@ -21,12 +23,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OrderManagementController {
 
+	private static final Log logger = LogFactory.getLog(OrderManagementController.class);
+
 	@Autowired
 	@Qualifier("orderManagementServiceImpl")
 	private OrderManagementService orderManagementService;
 	
 	@PostMapping(value = "/order", produces = "application/json", consumes = "application/json")
 	public APIDataResponse<Long> acceptNewOrder(@RequestBody OrderEntry orderEntry) {
+		logger.trace("Entering acceptNewOrder for POST on /order");
 		APIDataResponse<Long> response = new APIDataResponse<Long>();
 		try {
 			long orderId = orderManagementService.acceptNewOrder(orderEntry);
@@ -34,6 +39,7 @@ public class OrderManagementController {
 			response.setInfoMessage(ResultCode.ORDER_ACCEPTED.getMessage());
 			response.setResponseCode(ResultCode.ORDER_ACCEPTED.getCode());
 			response.setData(orderId);
+			logger.debug("Order added: " + orderEntry);
 		} catch (ExchangeException ee) {
 			response.setErrorMessage(ee.getMessage());
 			response.setResponseCode(ee.getErrorCode());
@@ -41,6 +47,7 @@ public class OrderManagementController {
 			response.setErrorMessage("Unexpected error. Please contact customer service");
 			response.setResponseCode(ResultCode.GENERAL_ERROR.getCode());
 		}
+		logger.trace("Exiting acceptNewOrder for POST on /order");
 		return response;
 	} 
 	

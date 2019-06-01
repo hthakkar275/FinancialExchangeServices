@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orders.domain.ExchangeException;
 import org.hemant.thakkar.financialexchange.orders.domain.Order;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderActivity;
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Service;
 
 @Service("orderManagementServiceImpl")
 public class OrderManagementServiceImpl implements OrderManagementService {
+
+	private static final Log logger = LogFactory.getLog(OrderManagementServiceImpl.class);
 
 	private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss.SSS");
 	
@@ -54,6 +58,7 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 
 	@Override
 	public long acceptNewOrder(OrderEntry orderEntry) throws ExchangeException {
+		logger.trace("Entering acceptOrder");
 		Order order = createOrder(orderEntry);
 		long orderId = orderRepository.saveOrder((OrderImpl) order);
 		if (orderId < 0) {
@@ -61,11 +66,12 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 		}
 		order.setId(orderId);
 		remoteServices.addOrderInBook(order);
+		logger.trace("Exiting acceptOrder");
 		return order.getId();
 	}
 
 	private Order createOrder(OrderEntry orderEntry) throws ExchangeException {
-		
+		logger.trace("Entering createOrder");
 		if (!remoteServices.isValidProduct(orderEntry.getProductId())) {
 			throw new ExchangeException(ResultCode.PRODUCT_NOT_FOUND);
 		}
@@ -84,6 +90,9 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 		order.setQuantity(orderEntry.getQuantity());
 		order.setPrice(orderEntry.getPrice());
 		order.setStatus(OrderStatus.NEW);
+		
+		logger.trace("Exiting createOrder");
+
 		return order;
 	}
 
@@ -123,15 +132,23 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 
 	@Override
 	public void addOrderActivity(long orderId, OrderActivityEntry orderActivityEntry) throws ExchangeException {
+		logger.trace("Entering addOrderActivity with activity: " + orderActivityEntry);
 		Order order = orderRepository.getOrder(orderId);
+		logger.debug("Order activity for order: " + order);
 		if (order == null) {
 			throw new ExchangeException(ResultCode.ORDER_NOT_FOUND);
 		}
 		if (orderActivityEntry.getOrderActivity() == OrderActivity.BOOKED) {
+			if (order.getTradedQantity() > 0) {
+				order.setStatus(OrderStatus.PARTIALLY_BOOKED_FILLED);
+			} else {
+				order.setStatus(OrderStatus.BOOKED);
+			}
 			order.setBookedQuantity(orderActivityEntry.getBookedQuantity());
-			order.setStatus(OrderStatus.BOOKED);
 		} else if (orderActivityEntry.getOrderActivity() == OrderActivity.TRADED) {
-			order.setBookedQuantity(order.getBookedQuantity() - orderActivityEntry.getTradedQuantity());
+			if (order.getStatus() == OrderStatus.BOOKED || order.getStatus() == OrderStatus.PARTIALLY_BOOKED_FILLED) {
+				order.setBookedQuantity(order.getBookedQuantity() - orderActivityEntry.getTradedQuantity());
+			}
 			order.setTradedQuantity(order.getTradedQantity() + orderActivityEntry.getTradedQuantity());
 			if (order.getBookedQuantity() > 0) {
 				order.setStatus(OrderStatus.PARTIALLY_BOOKED_FILLED);
@@ -150,6 +167,7 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 			order.setStatus(OrderStatus.UNKNOWN);
 		}
 		orderRepository.saveOrder((OrderImpl) order);
+		logger.trace("Exiting addOrderActivity with activity: " + orderActivityEntry);
 	}
 
 }

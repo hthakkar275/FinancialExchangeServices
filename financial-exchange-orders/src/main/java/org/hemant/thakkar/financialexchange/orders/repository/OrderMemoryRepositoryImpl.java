@@ -6,12 +6,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orders.domain.Order;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderImpl;
 import org.springframework.stereotype.Service;
 
 @Service("orderMemoryRepositoryImpl")
 public class OrderMemoryRepositoryImpl implements OrderRepository {
+
+	private static final Log logger = LogFactory.getLog(OrderMemoryRepositoryImpl.class);
 
 	private static AtomicLong idGenerator = new AtomicLong(1);
 	Map<Long, Order> orders;
@@ -22,10 +26,12 @@ public class OrderMemoryRepositoryImpl implements OrderRepository {
 	
 	@Override
 	public long saveOrder(OrderImpl order) {
+		logger.trace("Entering saveOrder");
 		if (order.getId() == null) {
 			order.setId(idGenerator.getAndIncrement());
 		}
 		orders.put(order.getId(), order);
+		logger.trace("Exiting saveOrder");
 		return order.getId();
 	}
 
