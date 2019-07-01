@@ -18,30 +18,34 @@ import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderBookItem;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderType;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.Side;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.TradeEntry;
+import org.hemant.thakkar.financialexchange.orderbooks.monitor.ExecPosRecorder;
 
 public class OrderBookImpl implements OrderBook {
 	
 	private static final Log logger = LogFactory.getLog(OrderBookImpl.class);
-
+	private static final String className = OrderBookImpl.class.getSimpleName();
+	
 	private static BigDecimal TWO = new BigDecimal("2.0");
 	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss.SSS");
 	
 	private RemoteServices remoteServices;
+	private ExecPosRecorder execPosRecorder;
 
 	private long productId;
 	private String productSymbol;
 	private List<OrderBookItem> items = new ArrayList<OrderBookItem>();
 	private BigDecimal tickSize;
 	
-	public OrderBookImpl(RemoteServices remoteServices, long productId, String productSymbol) {
-		this(remoteServices, new BigDecimal("0.01"), productId, productSymbol);
+	public OrderBookImpl(RemoteServices remoteServices, ExecPosRecorder execPosRecorder, long productId, String productSymbol) {
+		this(remoteServices, execPosRecorder, new BigDecimal("0.01"), productId, productSymbol);
 	}
 
-	public OrderBookImpl(RemoteServices remoteServices, BigDecimal tickSize, long productId, String productSymbol) {
+	public OrderBookImpl(RemoteServices remoteServices, ExecPosRecorder execPosRecorder, BigDecimal tickSize, long productId, String productSymbol) {
 		this.tickSize = tickSize;
 		this.setProductId(productId);
 		this.setProductSymbol(productSymbol);
 		this.remoteServices = remoteServices;
+		this.execPosRecorder = execPosRecorder;
 	}
 	
 	/**
@@ -58,6 +62,7 @@ public class OrderBookImpl implements OrderBook {
 	
 	
 	public void processOrder(OrderBookItem incomingOrder) {	
+		execPosRecorder.recordExecutionPoint(className, "processOrder", incomingOrder.getOrderId(), "entry");
 		if (incomingOrder.getQuantity() <= 0 ) {
 			throw new IllegalArgumentException("processOrder() given qty <= 0");
 		}
@@ -74,10 +79,12 @@ public class OrderBookImpl implements OrderBook {
 		} else {
 			processMarketOrder(incomingOrder);
 		}
+		execPosRecorder.recordExecutionPoint(className, "processOrder", incomingOrder.getOrderId(), "exit");
 	}
 	
 	
 	private void processMarketOrder(OrderBookItem incomingOrder) {
+		execPosRecorder.recordExecutionPoint(className, "processMarketOrder", incomingOrder.getOrderId(), "entry");
 		Side side = incomingOrder.getSide();
 		int qtyRemaining = incomingOrder.getQuantity();
 		if (side == Side.BUY) {
@@ -124,10 +131,13 @@ public class OrderBookImpl implements OrderBook {
 //			incomingOrder.setStatus(OrderStatus.NOT_FILLED);
 //		}
 //		remoteServices.saveOrder(incomingOrder);
+		execPosRecorder.recordExecutionPoint(className, "processMarketOrder", incomingOrder.getOrderId(), "exit");
+
 	}
 	
 	
 	private void processLimitOrder(OrderBookItem incomingOrder) {
+		execPosRecorder.recordExecutionPoint(className, "processLimitOrder", incomingOrder.getOrderId(), "entry");
 		logger.trace("Entering procesLimitOrder: " + incomingOrder);
 		int qtyRemaining = incomingOrder.getQuantity();
 		List<OrderBookItem> tradableOrders = this.items.stream()
@@ -173,10 +183,12 @@ public class OrderBookImpl implements OrderBook {
 //		}
 //		remoteServices.saveOrder(incomingOrder);
 		logger.trace("Exiting procesLimitOrder: " + incomingOrder);
+		execPosRecorder.recordExecutionPoint(className, "processLimitOrder", incomingOrder.getOrderId(), "exit");
 	}
 	
 	
 	private int processOrderList(List<OrderBookItem> tradableOrders, int qtyRemaining, OrderBookItem incomingOrder) {
+		execPosRecorder.recordExecutionPoint(className, "processOrderList", incomingOrder.getOrderId(), "entry");
 		logger.trace("Entering processOrderList: " + incomingOrder);
 
 		Iterator<OrderBookItem> iterator = tradableOrders.iterator();
@@ -214,7 +226,7 @@ public class OrderBookImpl implements OrderBook {
 			remoteServices.updateOrders(tradeEntry);
 		}
 		logger.trace("Exiting processOrderList: " + incomingOrder + " Remaining Qty = " + qtyRemaining);
-
+		execPosRecorder.recordExecutionPoint(className, "processOrderList", incomingOrder.getOrderId(), "exit");
 		return qtyRemaining;
 	}
 	

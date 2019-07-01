@@ -34,7 +34,7 @@ public class RemoteServicesImpl implements RemoteServices {
 	
 	public RemoteServicesImpl() {
 		baseUrl = System.getProperty("remote.services.baseurl", "http://localhost");
-		String useNonStanardPortStr = System.getProperty("remote.services.useNonStandardPort", "false");
+		String useNonStanardPortStr = System.getProperty("remote.services.useNonStandardPort", "true");
 		try {
 			useNonStandardPort = Boolean.parseBoolean(useNonStanardPortStr);
 		} catch (Exception e) {

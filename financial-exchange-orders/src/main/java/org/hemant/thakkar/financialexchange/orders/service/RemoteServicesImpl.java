@@ -11,6 +11,9 @@ import org.hemant.thakkar.financialexchange.orders.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orders.domain.Order;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderBookEntry;
 import org.hemant.thakkar.financialexchange.orders.domain.ResultCode;
+import org.hemant.thakkar.financialexchange.orders.monitor.ExecPosRecorder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,14 +29,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RemoteServicesImpl implements RemoteServices {
 
 	private static final Log logger = LogFactory.getLog(RemoteServicesImpl.class);
-
+	private static final String className = RemoteServicesImpl.class.getSimpleName();
+	
 	private String baseUrl;
 	private boolean useNonStandardPort;
 	private Map<String, Integer> servicesPorts;
 	
+	@Autowired
+	@Qualifier("asyncExecPosRecorder")
+	private ExecPosRecorder execPosRecorder;
+
 	public RemoteServicesImpl() {
 		baseUrl = System.getProperty("remote.services.baseurl", "http://localhost");
-		String useNonStanardPortStr = System.getProperty("remote.services.useNonStandardPort", "false");
+		String useNonStanardPortStr = System.getProperty("remote.services.useNonStandardPort", "true");
 		try {
 			useNonStandardPort = Boolean.parseBoolean(useNonStanardPortStr);
 		} catch (Exception e) {
@@ -54,6 +62,7 @@ public class RemoteServicesImpl implements RemoteServices {
 	
 	@Override
 	public boolean isValidProduct(long productId) {
+		execPosRecorder.recordExecutionPoint(className, "isValidProduct", productId, "entry");
 		boolean validProduct = false;
 		try {
 			StringBuffer stringBuffer = new StringBuffer(baseUrl);
@@ -75,13 +84,15 @@ public class RemoteServicesImpl implements RemoteServices {
 			int responseCode = root.get("responseCode").asInt();
 			validProduct = responseCode == ResultCode.PRODUCT_FOUND.getCode();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error while validating product", e);
 		}
+		execPosRecorder.recordExecutionPoint(className, "isValidProduct", productId, "exit");
 		return validProduct;
 	}
 
 	@Override
 	public boolean isValidParticipant(long participantId) {
+		execPosRecorder.recordExecutionPoint(className, "isValidParticipant", participantId, "entry");
 		boolean validParticipant = false;
 		try {
 			StringBuffer stringBuffer = new StringBuffer(baseUrl);
@@ -103,8 +114,9 @@ public class RemoteServicesImpl implements RemoteServices {
 			int responseCode = root.get("responseCode").asInt();
 			validParticipant = responseCode == ResultCode.PARTICIPANT_FOUND.getCode();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error while validating participant", e);
 		}
+		execPosRecorder.recordExecutionPoint(className, "isValidParticipant", participantId, "exit");
 		return validParticipant;
 	}
 
@@ -116,6 +128,7 @@ public class RemoteServicesImpl implements RemoteServices {
 
 	@Override
 	public boolean addOrderInBook(Order order) {
+		execPosRecorder.recordExecutionPoint(className, "addOrderInBook", order.getId(), "entry");
 		logger.trace("Entering addOrderInBook: " + order);
 		boolean addedToBook = false;
 		try {
@@ -147,6 +160,7 @@ public class RemoteServicesImpl implements RemoteServices {
 			logger.error("Error during service call to orderbook service for order: " + order);
 		}
 		logger.trace("Exiting addOrderInBook: " + order);
+		execPosRecorder.recordExecutionPoint(className, "addOrderInBook", order.getId(), "exit");
 		return addedToBook;
 	}
 

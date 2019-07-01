@@ -17,6 +17,7 @@ import org.hemant.thakkar.financialexchange.orders.domain.OrderLongevity;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderReport;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderStatus;
 import org.hemant.thakkar.financialexchange.orders.domain.ResultCode;
+import org.hemant.thakkar.financialexchange.orders.monitor.ExecPosRecorder;
 import org.hemant.thakkar.financialexchange.orders.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Service;
 public class OrderManagementServiceImpl implements OrderManagementService {
 
 	private static final Log logger = LogFactory.getLog(OrderManagementServiceImpl.class);
-
+	private static final String className = OrderManagementServiceImpl.class.getSimpleName();
 	private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss.SSS");
 	
 	@Autowired
@@ -37,6 +38,10 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 	@Qualifier("remoteServicesImpl")
 	private RemoteServices remoteServices;
 	
+	@Autowired
+	@Qualifier("asyncExecPosRecorder")
+	private ExecPosRecorder execPosRecorder;
+
 	@Override
 	public void cancelOrder(long orderId) throws ExchangeException {
 		Order order = orderRepository.getOrder(orderId);
@@ -58,6 +63,7 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 
 	@Override
 	public long acceptNewOrder(OrderEntry orderEntry) throws ExchangeException {
+		execPosRecorder.recordExecutionPoint(className, "acceptNewOrder", orderEntry.getId(), "entry");
 		logger.trace("Entering acceptOrder");
 		Order order = createOrder(orderEntry);
 		long orderId = orderRepository.saveOrder((OrderImpl) order);
@@ -67,10 +73,12 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 		order.setId(orderId);
 		remoteServices.addOrderInBook(order);
 		logger.trace("Exiting acceptOrder");
+		execPosRecorder.recordExecutionPoint(className, "acceptNewOrder", orderEntry.getId(), "exit");
 		return order.getId();
 	}
 
 	private Order createOrder(OrderEntry orderEntry) throws ExchangeException {
+		execPosRecorder.recordExecutionPoint(className, "creatOrder", orderEntry.getId(), "entry");
 		logger.trace("Entering createOrder");
 		if (!remoteServices.isValidProduct(orderEntry.getProductId())) {
 			throw new ExchangeException(ResultCode.PRODUCT_NOT_FOUND);
@@ -92,17 +100,21 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 		order.setStatus(OrderStatus.NEW);
 		
 		logger.trace("Exiting createOrder");
+		execPosRecorder.recordExecutionPoint(className, "creatOrder", orderEntry.getId(), "exit");
 
 		return order;
 	}
 
 	@Override
 	public void updateOrder(long orderId, OrderEntry orderEntry) throws ExchangeException {
+		execPosRecorder.recordExecutionPoint(className, "updateOrder", orderEntry.getId(), "entry");
 		Order order = createOrder(orderEntry);
 		orderRepository.saveOrder((OrderImpl) order);
+		execPosRecorder.recordExecutionPoint(className, "updateOrder", orderEntry.getId(), "exit");
 	}
 
 	private OrderReport createOrderReport(Order order) {
+		execPosRecorder.recordExecutionPoint(className, "createOrderReport", order.getId(), "entry");
 		OrderReport orderReport = new OrderReport();
 		orderReport.setBookedQuantity(order.getBookedQuantity());
 		orderReport.setEntryTime(timeFormatter.format(order.getEntryTime()));
@@ -118,20 +130,24 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 		orderReport.setPrice(order.getPrice());
 		List<Long> trades = remoteServices.getTradesForOrder(order.getId());
 		orderReport.setTrades(trades);
+		execPosRecorder.recordExecutionPoint(className, "createOrderReport", order.getId(), "exit");
 		return orderReport;
 	}
 
 	@Override
 	public List<OrderReport> getOrdersForProduct(long productId) throws ExchangeException {
+		execPosRecorder.recordExecutionPoint(className, "getOrdersForProduct", productId, "entry");
 		List<Order> orders = orderRepository.getOrdersByProduct(productId);
 		List<OrderReport> orderReports = orders.stream()
 				.map(this::createOrderReport)
 				.collect(Collectors.toList());
+		execPosRecorder.recordExecutionPoint(className, "getOrdersForProduct", productId, "exit");
 		return orderReports;
 	}
 
 	@Override
 	public void addOrderActivity(long orderId, OrderActivityEntry orderActivityEntry) throws ExchangeException {
+		execPosRecorder.recordExecutionPoint(className, "addOrderActivity", orderId, "entry");
 		logger.trace("Entering addOrderActivity with activity: " + orderActivityEntry);
 		Order order = orderRepository.getOrder(orderId);
 		logger.debug("Order activity for order: " + order);
@@ -168,6 +184,7 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 		}
 		orderRepository.saveOrder((OrderImpl) order);
 		logger.trace("Exiting addOrderActivity with activity: " + orderActivityEntry);
+		execPosRecorder.recordExecutionPoint(className, "addOrderActivity", orderId, "exit");
 	}
 
 }

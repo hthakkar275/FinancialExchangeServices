@@ -7,6 +7,7 @@ import org.hemant.thakkar.financialexchange.orderbooks.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderBookEntry;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderBookState;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.ResultCode;
+import org.hemant.thakkar.financialexchange.orderbooks.monitor.ExecPosRecorder;
 import org.hemant.thakkar.financialexchange.orderbooks.service.OrderBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,14 +23,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderBookManagementController {
 
 	private static final Log logger = LogFactory.getLog(OrderBookManagementController.class);
+	private static final String className = OrderBookManagementController.class.getSimpleName();
 
 	@Autowired
 	@Qualifier("orderBookServiceImpl")
 	private OrderBookService orderBookService;
 	
+	@Autowired
+	@Qualifier("asyncExecPosRecorder")
+	private ExecPosRecorder execPosRecorder;
+	
 	@PostMapping(value = "/orderBook/order", produces = "application/json", consumes = "application/json")
 	public APIResponse acceptNewOrder(@RequestBody OrderBookEntry orderBookEntry) {
 		logger.trace("Entering acceptNewOrder: " + orderBookEntry);
+		execPosRecorder.recordExecutionPoint(className, "acceptNewOrder", orderBookEntry.getOrderId(), "entry");
 		APIResponse response = new APIResponse();
 		try {
 			orderBookService.addOrder(orderBookEntry);
@@ -40,6 +47,8 @@ public class OrderBookManagementController {
 			logger.error("Unexpected error: " + orderBookEntry, t);
 			response.setErrorMessage("Unexpected error. Please contact customer service");
 			response.setResponseCode(ResultCode.GENERAL_ERROR.getCode());
+		} finally {
+			execPosRecorder.recordExecutionPoint(className, "acceptNewOrder", orderBookEntry.getOrderId(), "exit");
 		}
 		return response;
 

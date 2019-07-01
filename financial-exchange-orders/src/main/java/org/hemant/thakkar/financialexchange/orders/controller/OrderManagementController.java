@@ -2,6 +2,7 @@ package org.hemant.thakkar.financialexchange.orders.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hemant.thakkar.financialexchange.orders.monitor.ExecPosRecorder;
 import org.hemant.thakkar.financialexchange.orders.domain.APIDataResponse;
 import org.hemant.thakkar.financialexchange.orders.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orders.domain.ExchangeException;
@@ -23,18 +24,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OrderManagementController {
 
-	private static final Log logger = LogFactory.getLog(OrderManagementController.class);
+	private final static Log logger = LogFactory.getLog(OrderManagementController.class);
+	private final static String className = OrderManagementController.class.getSimpleName();
 
 	@Autowired
 	@Qualifier("orderManagementServiceImpl")
 	private OrderManagementService orderManagementService;
 	
+	@Autowired
+	@Qualifier("asyncExecPosRecorder")
+	private ExecPosRecorder execPosRecorder;
+
 	@PostMapping(value = "/order", produces = "application/json", consumes = "application/json")
 	public APIDataResponse<Long> acceptNewOrder(@RequestBody OrderEntry orderEntry) {
+		execPosRecorder.recordExecutionPoint(className, "acceptNewOrder", -1, "entry");
 		logger.trace("Entering acceptNewOrder for POST on /order");
 		APIDataResponse<Long> response = new APIDataResponse<Long>();
+		long orderId = -1;
 		try {
-			long orderId = orderManagementService.acceptNewOrder(orderEntry);
+			orderId = orderManagementService.acceptNewOrder(orderEntry);
 			response.setSuccess(true);
 			response.setInfoMessage(ResultCode.ORDER_ACCEPTED.getMessage());
 			response.setResponseCode(ResultCode.ORDER_ACCEPTED.getCode());
@@ -48,12 +56,14 @@ public class OrderManagementController {
 			response.setResponseCode(ResultCode.GENERAL_ERROR.getCode());
 		}
 		logger.trace("Exiting acceptNewOrder for POST on /order");
+		execPosRecorder.recordExecutionPoint(className, "acceptNewOrder", orderId, "exit");
 		return response;
 	} 
 	
 	@PutMapping(value = "/order/{orderId}", produces = "application/json", consumes = "application/json")
 	public APIResponse updateOrder(@PathVariable("orderId") long orderId,
 			@RequestBody OrderEntry orderEntry) {
+		execPosRecorder.recordExecutionPoint(className, "updateOrder", orderId, "entry");
 		APIResponse response = new APIResponse();
 		try {
 			orderManagementService.updateOrder(orderId, orderEntry);
@@ -67,6 +77,7 @@ public class OrderManagementController {
 			response.setErrorMessage("Unexpected error. Please contact customer service");
 			response.setResponseCode(ResultCode.GENERAL_ERROR.getCode());
 		}
+		execPosRecorder.recordExecutionPoint(className, "updateOrder", orderId, "exit");
 		return response;
 
 	} 
@@ -74,6 +85,7 @@ public class OrderManagementController {
 	@PutMapping(value = "/order/activity/{orderId}", produces = "application/json", consumes = "application/json")
 	public APIResponse updateOrderTrade(@PathVariable("orderId") long orderId,
 			@RequestBody OrderActivityEntry orderActivityEntry) {
+		execPosRecorder.recordExecutionPoint(className, "updateOrderTrade", orderId, "entry");
 		APIResponse response = new APIResponse();
 		try {
 			orderManagementService.addOrderActivity(orderId, orderActivityEntry);
@@ -87,6 +99,7 @@ public class OrderManagementController {
 			response.setErrorMessage("Unexpected error. Please contact customer service");
 			response.setResponseCode(ResultCode.GENERAL_ERROR.getCode());
 		}
+		execPosRecorder.recordExecutionPoint(className, "updateOrderTrade", orderId, "exit");
 		return response;
 
 	} 
@@ -94,6 +107,7 @@ public class OrderManagementController {
 
 	@GetMapping(value = "/order/{orderId}", produces = "application/json", consumes = "application/json")
 	public APIDataResponse<OrderReport> getOrderStatus(@PathVariable("orderId") long orderId) {
+		execPosRecorder.recordExecutionPoint(className, "getOrderStatus", orderId, "entry");
 		APIDataResponse<OrderReport> response = new APIDataResponse<>();
 		try {
 			OrderReport orderReport = orderManagementService.getOrderStatus(orderId);
@@ -108,12 +122,13 @@ public class OrderManagementController {
 			response.setErrorMessage("Unexpected error. Please contact customer service");
 			response.setResponseCode(ResultCode.GENERAL_ERROR.getCode());
 		}
+		execPosRecorder.recordExecutionPoint(className, "getOrderStatus", orderId, "exit");
 		return response;
-
 	} 
 
 	@DeleteMapping(value = "/order/{orderId}", produces = "application/json", consumes = "application/json")
 	public APIResponse deleteOrder(@PathVariable("orderId") long orderId) {
+		execPosRecorder.recordExecutionPoint(className, "deleteOrder", orderId, "entry");
 		APIResponse response = new APIResponse();
 		try {
 			orderManagementService.cancelOrder(orderId);
@@ -127,6 +142,7 @@ public class OrderManagementController {
 			response.setErrorMessage("Unexpected error. Please contact customer service");
 			response.setResponseCode(ResultCode.GENERAL_ERROR.getCode());
 		}
+		execPosRecorder.recordExecutionPoint(className, "deleteOrder", orderId, "exit");
 		return response;
 	} 
 }
