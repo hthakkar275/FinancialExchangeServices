@@ -1,7 +1,5 @@
 package org.hemant.thakkar.financialexchange.orderbooks.controller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.APIDataResponse;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderBookEntry;
@@ -9,6 +7,8 @@ import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderBookState;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.ResultCode;
 import org.hemant.thakkar.financialexchange.orderbooks.monitor.ExecPosRecorder;
 import org.hemant.thakkar.financialexchange.orderbooks.service.OrderBookService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,7 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OrderBookManagementController {
 
-	private static final Log logger = LogFactory.getLog(OrderBookManagementController.class);
+	//private static final Logger kLogger = LoggerFactory.getLogger(OrderBookManagementController.class);
+	private static final Logger logger = LoggerFactory.getLogger(OrderBookManagementController.class);
 	private static final String className = OrderBookManagementController.class.getSimpleName();
 
 	@Autowired
@@ -36,6 +37,7 @@ public class OrderBookManagementController {
 	@PostMapping(value = "/orderBook/order", produces = "application/json", consumes = "application/json")
 	public APIResponse acceptNewOrder(@RequestBody OrderBookEntry orderBookEntry) {
 		logger.trace("Entering acceptNewOrder: " + orderBookEntry);
+		//kLogger.trace("KafkaLog Entering OrderBookService acceptNewOrder");
 		execPosRecorder.recordExecutionPoint(className, "acceptNewOrder", orderBookEntry.getOrderId(), "entry");
 		APIResponse response = new APIResponse();
 		try {
@@ -50,6 +52,8 @@ public class OrderBookManagementController {
 		} finally {
 			execPosRecorder.recordExecutionPoint(className, "acceptNewOrder", orderBookEntry.getOrderId(), "exit");
 		}
+		logger.trace("Exiting acceptNewOrder: " + orderBookEntry);
+		//kLogger.trace("KafkaLog Exiting OrderBookService acceptNewOrder");
 		return response;
 
 	} 

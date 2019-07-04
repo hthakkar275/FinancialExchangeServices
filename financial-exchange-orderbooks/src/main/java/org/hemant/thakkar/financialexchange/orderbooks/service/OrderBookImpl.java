@@ -12,17 +12,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderBookItem;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderType;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.Side;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.TradeEntry;
 import org.hemant.thakkar.financialexchange.orderbooks.monitor.ExecPosRecorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OrderBookImpl implements OrderBook {
 	
-	private static final Log logger = LogFactory.getLog(OrderBookImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(OrderBookImpl.class);
 	private static final String className = OrderBookImpl.class.getSimpleName();
 	
 	private static BigDecimal TWO = new BigDecimal("2.0");

@@ -1,7 +1,5 @@
 package org.hemant.thakkar.financialexchange.orders.controller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orders.monitor.ExecPosRecorder;
 import org.hemant.thakkar.financialexchange.orders.domain.APIDataResponse;
 import org.hemant.thakkar.financialexchange.orders.domain.APIResponse;
@@ -11,6 +9,8 @@ import org.hemant.thakkar.financialexchange.orders.domain.OrderEntry;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderReport;
 import org.hemant.thakkar.financialexchange.orders.domain.ResultCode;
 import org.hemant.thakkar.financialexchange.orders.service.OrderManagementService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OrderManagementController {
 
-	private final static Log logger = LogFactory.getLog(OrderManagementController.class);
+	private static final Logger logger = LoggerFactory.getLogger(OrderManagementController.class);
+	//private final static Log logger = LogFactory.getLog(OrderManagementController.class);
 	private final static String className = OrderManagementController.class.getSimpleName();
 
 	@Autowired
@@ -39,6 +40,7 @@ public class OrderManagementController {
 	public APIDataResponse<Long> acceptNewOrder(@RequestBody OrderEntry orderEntry) {
 		execPosRecorder.recordExecutionPoint(className, "acceptNewOrder", -1, "entry");
 		logger.trace("Entering acceptNewOrder for POST on /order");
+//		kLogger.trace("KafkaLog Entering Order Service acceptNewOrder");
 		APIDataResponse<Long> response = new APIDataResponse<Long>();
 		long orderId = -1;
 		try {
@@ -56,6 +58,7 @@ public class OrderManagementController {
 			response.setResponseCode(ResultCode.GENERAL_ERROR.getCode());
 		}
 		logger.trace("Exiting acceptNewOrder for POST on /order");
+		//kLogger.trace("KafkaLog Exiting Order Service acceptNewOrder");
 		execPosRecorder.recordExecutionPoint(className, "acceptNewOrder", orderId, "exit");
 		return response;
 	} 

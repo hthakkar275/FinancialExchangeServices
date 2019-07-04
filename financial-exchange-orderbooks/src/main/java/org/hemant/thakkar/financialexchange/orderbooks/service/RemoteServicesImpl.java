@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.APIDataResponse;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderActivity;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.OrderActivityEntry;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.ResultCode;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.TradeEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service("remoteServicesImpl")
 public class RemoteServicesImpl implements RemoteServices {
 
-	private static final Log logger = LogFactory.getLog(RemoteServicesImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(RemoteServicesImpl.class);
 
 	private String baseUrl;
 	private boolean useNonStandardPort;

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" name="spring-boot-kafka-log" packages="org.hemant.thakkar">
+    <Appenders>
+        <Kafka name="Kafka" topic="OrderBookServiceLogger">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %-7t %F:%L - %m%n"/>
+            <Property name="bootstrap.servers">localhost:9091</Property>
+        </Kafka>
+        <Async name="Async">
+            <AppenderRef ref="Kafka"/>
+        </Async>
+
+        <Console name="stdout" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %-7t %F:%L - %m%n"/>
+        </Console>
+
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="stdout"/>
+        </Root>
+        <Logger name="org.hemant.thakkar" level="TRACE">
+            <AppenderRef ref="Kafka"/>
+            <AppenderRef ref="stdout"/>
+        </Logger>
+        <Logger name="org.apache.kafka" level="WARN" />
+    </Loggers>
+</Configuration>

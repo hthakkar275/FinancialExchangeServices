@@ -12,7 +12,7 @@ public class ExecPosMessageUtils {
 	private Producer<Long, ExecPosMessage> producer;
 
 	public ExecPosMessageUtils() {
-		execPosMessageTopic = System.getProperty("exec.pos.message.topic", "ExecPos");
+		execPosMessageTopic = System.getProperty("exec.pos.message.topic", "OrderServiceExecPos");
 		String kafkaHost = System.getProperty("kafka.host", "localhost");
 		int kafkaPort = Integer.parseInt(System.getProperty("kafka.port", "9091"));
 		String kafkaHostPort = kafkaHost + ":" + kafkaPort;

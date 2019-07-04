@@ -5,8 +5,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orders.domain.ExchangeException;
 import org.hemant.thakkar.financialexchange.orders.domain.Order;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderActivity;
@@ -19,6 +17,8 @@ import org.hemant.thakkar.financialexchange.orders.domain.OrderStatus;
 import org.hemant.thakkar.financialexchange.orders.domain.ResultCode;
 import org.hemant.thakkar.financialexchange.orders.monitor.ExecPosRecorder;
 import org.hemant.thakkar.financialexchange.orders.repository.OrderRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,8 @@ import org.springframework.stereotype.Service;
 @Service("orderManagementServiceImpl")
 public class OrderManagementServiceImpl implements OrderManagementService {
 
-	private static final Log logger = LogFactory.getLog(OrderManagementServiceImpl.class);
+	//private static final Log logger = LogFactory.getLog(OrderManagementServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(OrderManagementServiceImpl.class);
 	private static final String className = OrderManagementServiceImpl.class.getSimpleName();
 	private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss.SSS");
 	

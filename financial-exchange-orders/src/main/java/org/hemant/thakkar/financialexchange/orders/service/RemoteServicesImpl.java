@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hemant.thakkar.financialexchange.orders.domain.APIResponse;
 import org.hemant.thakkar.financialexchange.orders.domain.Order;
 import org.hemant.thakkar.financialexchange.orders.domain.OrderBookEntry;
 import org.hemant.thakkar.financialexchange.orders.domain.ResultCode;
 import org.hemant.thakkar.financialexchange.orders.monitor.ExecPosRecorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service("remoteServicesImpl")
 public class RemoteServicesImpl implements RemoteServices {
 
-	private static final Log logger = LogFactory.getLog(RemoteServicesImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(RemoteServicesImpl.class);
 	private static final String className = RemoteServicesImpl.class.getSimpleName();
 	
 	private String baseUrl;
