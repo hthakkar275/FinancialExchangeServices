@@ -12,6 +12,8 @@ import org.hemant.thakkar.financialexchange.orderbooks.domain.ResultCode;
 import org.hemant.thakkar.financialexchange.orderbooks.domain.TradeEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,6 +30,10 @@ public class RemoteServicesImpl implements RemoteServices {
 
 	private static final Logger logger = LoggerFactory.getLogger(RemoteServicesImpl.class);
 
+	@Autowired
+	@Qualifier("restTemplate")
+	private RestTemplate restTemplate;
+	
 	private String baseUrl;
 	private boolean useNonStandardPort;
 	private Map<String, Integer> servicesPorts;
@@ -67,7 +73,6 @@ public class RemoteServicesImpl implements RemoteServices {
 			String serviceUrl = stringBuffer.toString();
 			System.out.println("saveTrade service url: " + serviceUrl);
 			
-			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<TradeEntry> entity = new HttpEntity<TradeEntry>(tradeEntry, headers);
@@ -94,7 +99,6 @@ public class RemoteServicesImpl implements RemoteServices {
 			String serviceUrl = stringBuffer.toString();
 			System.out.println("getProductSymbol service url: " + serviceUrl);
 
-			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<String> entity = new HttpEntity<String>(headers);
@@ -147,7 +151,6 @@ public class RemoteServicesImpl implements RemoteServices {
 			orderActivityEntry.setOrderActivity(OrderActivity.TRADED);
 			orderActivityEntry.setActivityTime(tradeTime);
 			
-			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<OrderActivityEntry> entity = new HttpEntity<OrderActivityEntry>(orderActivityEntry, headers);
@@ -183,7 +186,6 @@ public class RemoteServicesImpl implements RemoteServices {
 			orderActivityEntry.setOrderActivity(OrderActivity.BOOKED);
 			orderActivityEntry.setActivityTime(bookedTime);
 			
-			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<OrderActivityEntry> entity = new HttpEntity<OrderActivityEntry>(orderActivityEntry, headers);

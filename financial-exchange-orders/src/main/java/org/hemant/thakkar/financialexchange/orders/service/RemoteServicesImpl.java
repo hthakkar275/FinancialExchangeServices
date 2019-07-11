@@ -36,6 +36,10 @@ public class RemoteServicesImpl implements RemoteServices {
 	private Map<String, Integer> servicesPorts;
 	
 	@Autowired
+	@Qualifier("restTemplate")
+	private RestTemplate restTemplate;
+
+	@Autowired
 	@Qualifier("asyncExecPosRecorder")
 	private ExecPosRecorder execPosRecorder;
 
@@ -74,7 +78,6 @@ public class RemoteServicesImpl implements RemoteServices {
 			String serviceUrl = stringBuffer.toString();
 			System.out.println("isValidProduct service url: " + serviceUrl);
 			
-			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<String> entity = new HttpEntity<String>(headers);
@@ -104,7 +107,6 @@ public class RemoteServicesImpl implements RemoteServices {
 			String serviceUrl = stringBuffer.toString();
 			System.out.println("isValidParticipant service url: " + serviceUrl);
 
-			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<String> entity = new HttpEntity<String>(headers);
@@ -149,7 +151,6 @@ public class RemoteServicesImpl implements RemoteServices {
 			orderBookEntry.setSide(order.getSide());
 			orderBookEntry.setType(order.getType());
 			
-			RestTemplate restTemplate = new RestTemplate(); 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<OrderBookEntry> entity = new HttpEntity<OrderBookEntry>(orderBookEntry, headers);

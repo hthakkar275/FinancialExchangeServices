@@ -2,7 +2,7 @@
 <Configuration status="info" name="spring-boot-kafka-log" packages="org.hemant.thakkar">
     <Appenders>
         <Kafka name="Kafka" topic="OrderBookServiceLogger">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %-7t %F:%L - %m%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [OrderBookService,%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-B3-ParentSpanId},%X{X-Span-Export}] %-5p %-7t %F:%L - %m%n"/>
             <Property name="bootstrap.servers">localhost:9091</Property>
         </Kafka>
         <Async name="Async">
@@ -10,7 +10,7 @@
         </Async>
 
         <Console name="stdout" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %-7t %F:%L - %m%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [OrderBookService,%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-B3-ParentSpanId},%X{X-Span-Export}] %-5p %-7t %F:%L - %m%n"/>
         </Console>
 
     </Appenders>
@@ -18,10 +18,10 @@
         <Root level="INFO">
             <AppenderRef ref="stdout"/>
         </Root>
-        <Logger name="org.hemant.thakkar" level="TRACE">
+        <Logger name="org.hemant.thakkar" level="TRACE" additivity="false">
             <AppenderRef ref="Kafka"/>
             <AppenderRef ref="stdout"/>
         </Logger>
-        <Logger name="org.apache.kafka" level="WARN" />
+        <Logger name="org.apache.kafka" level="WARN" additivity="false"/>
     </Loggers>
 </Configuration>
